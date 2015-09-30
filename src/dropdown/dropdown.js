@@ -174,6 +174,16 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
         display: isOpen ? 'block' : 'none'
       };
 
+      // Check if there's enough space for dropdownMenu to position below the element
+      // and if not position it above
+      var documentHeight = $document.innerHeight();
+      var dropdownMenuHeight = self.dropdownMenu.height();
+      var elementHeight = self.$element.height();
+      if (pos.top + dropdownMenuHeight > documentHeight) {
+        css.top = pos.top - (elementHeight + dropdownMenuHeight) + 'px';
+        self.$element.addClass('dropdown-menu-top');
+      }
+
       var rightalign = self.dropdownMenu.hasClass('dropdown-menu-right');
       if (!rightalign) {
         css.left = pos.left + 'px';
