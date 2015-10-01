@@ -181,7 +181,7 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
       var elementHeight = self.$element.height();
       if (pos.top + dropdownMenuHeight > documentHeight) {
         css.top = pos.top - (elementHeight + dropdownMenuHeight) + 'px';
-        self.$element.addClass('dropdown-menu-top');
+        self.dropdownMenu.addClass('dropdown-menu-top');
       }
 
       var rightalign = self.dropdownMenu.hasClass('dropdown-menu-right');
