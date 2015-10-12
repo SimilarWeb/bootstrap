@@ -221,6 +221,13 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
 
       scope.focusToggleElement();
       dropdownService.open(scope);
+      // hide dropdownMenu on scroll
+      if (appendToBody && self.dropdownMenu) {
+        document.addEventListener('nanoscroll', function () {
+          self.dropdownMenu.css({display: 'none'});
+          scope.isOpen = false;
+        });
+      }
     } else {
       if (self.dropdownMenuTemplateUrl) {
         if (templateScope) {
@@ -233,6 +240,8 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
 
       dropdownService.close(scope);
       self.selectedOption = null;
+
+      document.removeEventListener('nanoscroll');
     }
 
     if (angular.isFunction(setIsOpen)) {
