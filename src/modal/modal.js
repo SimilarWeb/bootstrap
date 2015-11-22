@@ -1,4 +1,59 @@
-angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
+angular.module('ui.bootstrap.modal', [])
+
+/**
+ * A helper, internal data structure that acts as a map but also allows getting / removing
+ * elements in the LIFO order
+ */
+  .factory('$$stackedMap', function() {
+    return {
+      createNew: function() {
+        var stack = [];
+
+        return {
+          add: function(key, value) {
+            stack.push({
+              key: key,
+              value: value
+            });
+          },
+          get: function(key) {
+            for (var i = 0; i < stack.length; i++) {
+              if (key == stack[i].key) {
+                return stack[i];
+              }
+            }
+          },
+          keys: function() {
+            var keys = [];
+            for (var i = 0; i < stack.length; i++) {
+              keys.push(stack[i].key);
+            }
+            return keys;
+          },
+          top: function() {
+            return stack[stack.length - 1];
+          },
+          remove: function(key) {
+            var idx = -1;
+            for (var i = 0; i < stack.length; i++) {
+              if (key == stack[i].key) {
+                idx = i;
+                break;
+              }
+            }
+            return stack.splice(idx, 1)[0];
+          },
+          removeTop: function() {
+            return stack.splice(stack.length - 1, 1)[0];
+          },
+          length: function() {
+            return stack.length;
+          }
+        };
+      }
+    };
+  })
+
 /**
  * A helper, internal data structure that stores all references attached to key
  */
@@ -121,7 +176,6 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
       },
       link: function(scope, element, attrs) {
         element.addClass(attrs.windowClass || '');
-        element.addClass(attrs.windowTopClass || '');
         scope.size = attrs.size;
 
         scope.close = function(evt) {
@@ -132,9 +186,6 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
             $modalStack.dismiss(modal.key, 'backdrop click');
           }
         };
-
-        // moved from template to fix issue #2280
-        element.on('click', scope.close);
 
         // This property is only added to the scope for the purpose of detecting when this directive is rendered.
         // We can detect that by using this property in the template associated with this directive and then use
@@ -286,7 +337,6 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
           var modalBodyClass = modalWindow.openedClass || OPENED_MODAL_CLASS;
           openedClasses.remove(modalBodyClass, modalInstance);
           body.toggleClass(modalBodyClass, openedClasses.hasKey(modalBodyClass));
-          toggleTopWindowClass(true);
         });
         checkRemoveBackdrop();
 
@@ -295,16 +345,6 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
           elementToReceiveFocus.focus();
         } else {
           body.focus();
-        }
-      }
-
-      // Add or remove "windowTopClass" from the top window in the stack
-      function toggleTopWindowClass(toggleSwitch) {
-        var modalWindow;
-
-        if (openedWindows.length() > 0) {
-          modalWindow = openedWindows.top().value;
-          modalWindow.modalDomEl.toggleClass(modalWindow.windowTopClass || '', toggleSwitch);
         }
       }
 
@@ -404,16 +444,13 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
         var modalOpener = $document[0].activeElement,
           modalBodyClass = modal.openedClass || OPENED_MODAL_CLASS;
 
-        toggleTopWindowClass(false);
-
         openedWindows.add(modalInstance, {
           deferred: modal.deferred,
           renderDeferred: modal.renderDeferred,
           modalScope: modal.scope,
           backdrop: modal.backdrop,
           keyboard: modal.keyboard,
-          openedClass: modal.openedClass,
-          windowTopClass: modal.windowTopClass
+          openedClass: modal.openedClass
         });
 
         openedClasses.put(modalBodyClass, modalInstance);
@@ -437,7 +474,6 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
         angularDomEl.attr({
           'template-url': modal.windowTemplateUrl,
           'window-class': modal.windowClass,
-          'window-top-class': modal.windowTopClass,
           'size': modal.size,
           'index': openedWindows.length() - 1,
           'animate': 'animate'
@@ -662,7 +698,6 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap'])
                   backdrop: modalOptions.backdrop,
                   keyboard: modalOptions.keyboard,
                   backdropClass: modalOptions.backdropClass,
-                  windowTopClass: modalOptions.windowTopClass,
                   windowClass: modalOptions.windowClass,
                   windowTemplateUrl: modalOptions.windowTemplateUrl,
                   size: modalOptions.size,
