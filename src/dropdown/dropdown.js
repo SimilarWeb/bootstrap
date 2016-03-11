@@ -207,6 +207,11 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
       }
     });
 
+    var nanoscrollListener = function () {
+      self.dropdownMenu.css({display: 'none'});
+      scope.isOpen = false;
+    };
+
     if (isOpen) {
       if (self.dropdownMenuTemplateUrl) {
         $templateRequest(self.dropdownMenuTemplateUrl).then(function(tplContent) {
@@ -223,10 +228,7 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
       dropdownService.open(scope);
       // hide dropdownMenu on scroll
       if (appendToBody && self.dropdownMenu) {
-        document.addEventListener('nanoscroll', function () {
-          self.dropdownMenu.css({display: 'none'});
-          scope.isOpen = false;
-        });
+        document.addEventListener('nanoscroll', nanoscrollListener);
       }
     } else {
       if (self.dropdownMenuTemplateUrl) {
@@ -241,7 +243,7 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
       dropdownService.close(scope);
       self.selectedOption = null;
 
-      document.removeEventListener('nanoscroll');
+      document.removeEventListener('nanoscroll', nanoscrollListener);
     }
 
     if (angular.isFunction(setIsOpen)) {
