@@ -1,3 +1,4 @@
 <li ng-class="{active: active, disabled: disabled}">
-  <a href ng-click="select()" uib-tab-heading-transclude>{{heading}}</a>
+  <a href ng-if="!href" ng-click="select()" uib-tab-heading-transclude>{{heading}}</a>
+  <a href ng-if="href" ng-href="{{href}}" uib-tab-heading-transclude>{{heading}}</a>
 </li>
